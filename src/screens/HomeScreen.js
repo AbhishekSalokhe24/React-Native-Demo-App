@@ -55,6 +55,7 @@ export default function HomeScreen({ navigation }) {
             key={movie.id}
             onPress={() =>
               navigation.navigate('Details', {
+                id: movie.id,
                 title: movie.title,
                 description: movie.description,
                 genre: movie.genre,
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
   btnText: {
     color: '#000',
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   selectedBtnText: {
     color: '#000', 

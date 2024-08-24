@@ -7,7 +7,7 @@ const SplashScreen = ({ onFinish }) => {
     // Simulate a splash screen delay
     const timer = setTimeout(() => {
       onFinish(); // Callback to transition to the main content
-    }, 3000); // Adjust the duration as needed
+    }, 2000); // Adjust the duration as needed
 
     return () => clearTimeout(timer); // Clean up the timer on unmount
   }, [onFinish]);

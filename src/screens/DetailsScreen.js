@@ -7,19 +7,53 @@ import {
   ImageBackground,
   Button,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import coverimage from '../assets/Cover.jpg';
 import Modal from 'react-native-modal';
+import {WatchlistContext} from '../contex/WatchlistContext ';
 
 const DetailsScreen = ({route, navigation}) => {
+  // For managing modal state
   const [isModalVisible, setModalVisible] = useState(false);
+  const [iconName, setIconName] = useState('bookmark-border');
+  const [isAdded, setAdded] = useState(false);
+  const {addToWatchlist, removeFromWatchlist, isMovieInWatchlist} =
+    useContext(WatchlistContext);
 
-  const {title, description, genre, image, rating, release_date} = route.params;
+  const {id, title, description, genre, image, rating, release_date} =
+    route.params;
 
+  const movieNew = {
+    id: id,
+    title: title,
+    genre: genre,
+    image: image,
+    rating: rating,
+    release_date: release_date,
+  };
+  const isInWatchlist = isMovieInWatchlist(movieNew.id);
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
+  };
+
+  const toogleSaveIcon = () => {
+    setIconName(prevIconName =>
+      prevIconName === 'bookmark-border' ? 'bookmark' : 'bookmark-border',
+    );
+    setAdded(prevAdded => !prevAdded);
+
+    if (isInWatchlist) {
+      removeFromWatchlist(movieNew.id);
+    } else {
+      addToWatchlist(movieNew);
+    }
+  };
+
+  const handleBookPress = () => {
+    toggleModal();
+    toogleSaveIcon();
   };
   return (
     <ScrollView style={styles.container}>
@@ -38,8 +72,8 @@ const DetailsScreen = ({route, navigation}) => {
       </View>
       <View style={styles.posterImgView}>
         <Image source={image} style={styles.image} />
-        <Pressable style={styles.wishBtn} onPress={toggleModal}>
-          <Icon name="muffin" size={25} color="#000" />
+        <Pressable style={styles.wishBtn} onPress={handleBookPress}>
+          <Icon name={iconName} size={25} color="#000" />
         </Pressable>
       </View>
       <View style={styles.textContainer}>
@@ -73,15 +107,26 @@ const DetailsScreen = ({route, navigation}) => {
           </View>
         </View>
       </View>
-      <View styles={{flex: 1}}>
-        <Modal isVisible={isModalVisible} backdropColor="gray" style={{height:500}}>
-          <View style={{flex: 1, height: 100}}>
-            <Text>Hello!</Text>
 
-            <Button title="Hide modal" onPress={toggleModal} />
-          </View>
-        </Modal>
-      </View>
+      {/* MODAL Here */}
+      <Modal
+        isVisible={isModalVisible}
+        backdropColor="black"
+        backdropTransitionInTiming={2000}>
+        <View style={styles.modalContainer}>
+          <Pressable
+            onPress={() => navigation.navigate('Watchlist')}
+            style={styles.backButton2}>
+            <Icon name="close" size={20} color="#000" />
+          </Pressable>
+          <Text style={styles.modaltext}>
+            {isAdded
+              ? 'Hurray! Added to your watchlist'
+              : 'Removed from your watchlist'}{' '}
+            <Text>&#128512;</Text>
+          </Text>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -106,10 +151,13 @@ const styles = StyleSheet.create({
   wishBtn: {
     backgroundColor: '#4FCCA3',
     position: 'relative',
-    left: 105,
+    left: 80,
     top: 130,
     padding: 10,
     borderRadius: 50,
+  },
+  wishBtnPrssed: {
+    backgroundColor: '#0000',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -121,17 +169,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 5,
-    margin: 5,
+    marginTop: 15,
+    marginLeft: 10,
     borderRadius: 10,
     backgroundColor: '#4FCCA3',
     width: 100,
+  },
+  backButton2:{
+    backgroundColor: '#4FCCA3',
+    padding:5,
+    borderRadius:50,
+    marginLeft:250,
   },
   backButtonText: {
     fontWeight: 'bold',
     color: '#000',
     marginLeft: 15,
   },
-
+  image: {
+    width: 150,
+    height: 200,
+    borderRadius: 10,
+    marginTop: 55,
+    marginLeft: 35,
+  },
   textColor: {
     color: '#ffff',
   },
@@ -139,6 +200,7 @@ const styles = StyleSheet.create({
     fontSize: 35,
     color: '#4FCCA3',
     fontWeight: '900',
+    marginTop: 10,
   },
   about: {
     borderRadius: 45,
@@ -170,12 +232,33 @@ const styles = StyleSheet.create({
     width: '50%',
     marginTop: 15,
   },
-  image: {
-    width: 150,
-    height: 200,
+
+  // Modal Styling Here
+  modalContainer: {
+    backgroundColor: '#334155',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
     borderRadius: 10,
-    marginTop: 85,
-    marginLeft: 35,
+  },
+  modalView: {
+    backgroundColor: 'white',
+    height: 140,
+    width: 250,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: 'black',
+    borderWidth: 2,
+  },
+  modaltext: {
+    fontSize: 16,
+    color: '#4FCCA3',
+    margin:15
+  },
+  modalBtn: {
+    margin: 20,
+    width: 200,
   },
 });
 
